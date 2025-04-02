@@ -260,17 +260,172 @@ namespace Keyence
 
         // commands
 
-        /// <summary>發行觸發</summary>
-        /// <remarks>針對等待觸發的［拍攝］工具，發行指定的觸發訊號。</remarks>
-        public ErrorCode TRG()
+        /// <summary>
+        /// T1 觸發發行
+        /// </summary>
+        public ErrorCode T1()
         {
-            var r = Execute("TRG").Result;
-            //if (Send("TRG", out var err, out var res))
+            var r = Execute("T1").Result;
             if (r.IsSuccess)
                 return r.ErrorCode;
             else if (r.Result.ER(out var err1))
                 if (err1.ToInt32(out int err2))
-                    return SetErr("TRG", (ErrorCode)err2);
+                    return SetErr("T1", (ErrorCode)err2);
+            return r.ErrorCode;
+        }
+
+        /// <summary>
+        /// T2 觸發發行
+        /// </summary>
+        public ErrorCode T2()
+        {
+            var r = Execute("T2").Result;
+            if (r.IsSuccess)
+                return r.ErrorCode;
+            else if (r.Result.ER(out var err1))
+                if (err1.ToInt32(out int err2))
+                    return SetErr("T2", (ErrorCode)err2);
+            return r.ErrorCode;
+        }
+
+        /// <summary>
+        /// T3 觸發發行
+        /// </summary>
+        public ErrorCode T3()
+        {
+            var r = Execute("T3").Result;
+            if (r.IsSuccess)
+                return r.ErrorCode;
+            else if (r.Result.ER(out var err1))
+                if (err1.ToInt32(out int err2))
+                    return SetErr("T3", (ErrorCode)err2);
+            return r.ErrorCode;
+        }
+
+        /// <summary>
+        /// T4 觸發發行
+        /// </summary>
+        public ErrorCode T4()
+        {
+            var r = Execute("T4").Result;
+            if (r.IsSuccess)
+                return r.ErrorCode;
+            else if (r.Result.ER(out var err1))
+                if (err1.ToInt32(out int err2))
+                    return SetErr("T4", (ErrorCode)err2);
+            return r.ErrorCode;
+        }
+
+        /// <summary>
+        /// 全觸發發行
+        /// </summary>
+        public ErrorCode TA()
+        {
+            var r = Execute("TA").Result;
+            if (r.IsSuccess)
+                return r.ErrorCode;
+            else if (r.Result.ER(out var err1))
+                if (err1.ToInt32(out int err2))
+                    return SetErr("TA", (ErrorCode)err2);
+            return r.ErrorCode;
+        }
+
+        /// <summary>
+        /// 遷移至運轉模式
+        /// </summary>
+        /// <remarks>
+        /// 從設定模式遷移至運轉模式。已經處於運轉模式時，將無任何動作，正常結束。
+        /// </remarks>
+        public ErrorCode R0() => Execute("R0").Result.ErrorCode;
+
+        /// <summary>
+        /// 遷移至設定模式
+        /// </summary>
+        /// <remarks>
+        /// 從運轉模式遷移至設定模式。已經處於設定模式時，將無任何動作，正常結束。
+        /// </remarks>
+        public ErrorCode S0() => Execute("S0").Result.ErrorCode;
+
+        /// <summary>
+        /// 復位
+        /// </summary>
+        /// <remarks>
+        /// 執行以下所有的項目。
+        ///     • 清除所有包含圖像的各種緩存。
+        ///     • 新建保存數據文件的文件名稱。
+        ///     • 初始化綜合判定輸出。
+        ///     • 清除所有歷史數據。
+        ///     • 清除所有統計數據。
+        ///     • 清除檢測次數。
+        ///     • 清除OUT_DATA0～OUT_DATA15。
+        /// </returns>
+        public ErrorCode RS() => Execute("RS").Result.ErrorCode;
+
+        /// <summary>
+        /// 重新啟動
+        /// </summary>
+        /// <remarks>
+        /// 保存當前的檢測設定，重新啟動。
+        /// </remarks>
+        public ErrorCode RB() => Execute("RB").Result.ErrorCode;
+
+        /// <summary>
+        /// 保存設定
+        /// </summary>
+        /// <remarks>
+        /// 保存當前的檢測設定、環境設定。
+        /// </remarks>
+        public ErrorCode SS() => Execute("SS").Result.ErrorCode;
+
+        /// <summary>
+        /// 錯誤清除
+        /// </summary>
+        /// <remarks>
+        /// 清除錯誤狀態。非錯誤狀態時，會正常結束。
+        /// </remarks>
+        public ErrorCode CE() => Execute("CE").Result.ErrorCode;
+
+        /// <summary>
+        /// 切換運轉畫面
+        /// </summary>
+        /// <param name="n">
+        /// 指定畫面類別 （0～1）
+        /// 0：圖像畫面
+        /// 1：運轉畫面
+        /// </param>
+        /// <param name="mm">
+        /// 畫面編號
+        /// 0～4：CCD No. （1～4、0為所有的CCD）
+        /// 0～9：運轉畫面No. （S00～S09）
+        /// </param>
+        /// <returns></returns>
+        public ErrorCode VW(int n, int mm) => Execute("VW", $"{n},{mm}").Result.ErrorCode;
+
+        /// <summary>
+        /// 運轉／設定模式讀取
+        /// </summary>
+        /// <remarks>
+        /// 多次拍攝為有效時，到1次檢測的中途為止，解除已經輸入觸發的狀態。捨捨棄執行中的檢測的拍攝圖像及檢測結果，返回到執行檢測前的狀態。
+        /// </remarks>
+        public ErrorCode RE() => Execute("RE").Result.ErrorCode;
+
+        /// <summary>
+        /// 運轉／設定模式讀取
+        /// </summary>
+        /// <param name="mode">
+        /// 0 : 設定模式
+        /// 1 : 運作模式
+        /// </param>
+        /// <remarks>讀出目前動作模式（運作模式/設定模式）。</remarks>
+        public ErrorCode RM(out int mode)
+        {
+            mode = 0;
+            var r = Execute("RM").Result;
+            if (r.IsSuccess)
+            {
+                if (r.Result.Get(1).ToInt32(out mode))
+                    _RunningMode.Value = mode;
+            }
             return r.ErrorCode;
         }
 
@@ -309,60 +464,12 @@ namespace Keyence
             return r.ErrorCode;
         }
 
-        /// <summary>重置</summary>
-        /// <remarks>
-        /// 會執行以下所有項目。
-        /// •將系統屬性全部初始化，全部清除包含映像的各種快取。
-        /// •清除綜合判定。
-        /// •全部清除工具和任務的執行結果。
-        /// •全部初始化輸出端子。
-        /// •全部清除Fieldbus的輸出範圍。
-        /// •解除工具的等待觸發。
-        /// •新建儲存資料檔的檔案名稱。
-        /// •返回主任務的開頭。
-        /// •全部清除歷史資料。
-        /// •全部清除統計資料。
-        /// •清除透過TD指令設定的禁止觸發狀態。
-        /// •清除透過OD指令設定的禁止輸出狀態。
-        /// </remarks>
-        public ErrorCode RS() => Execute("RS").Result.ErrorCode;
-
-        /// <summary>重新啟動</summary>
-        /// <remarks>重新啟動本機。</remarks>
-        public ErrorCode RB() => Execute("RB").Result.ErrorCode;
-
-        /// <summary>遷移至運行模式</summary>
-        /// <remarks>從設定模式切換至運轉模式。</remarks>
-        public ErrorCode RUN() => Execute("RUN").Result.ErrorCode;
-
-        /// <summary>遷移至設定模式</summary>
-        /// <remarks>從運轉模式切換至設定模式。</remarks>
-        public ErrorCode SET() => Execute("SET").Result.ErrorCode;
-
         /// <summary>
         /// 0 : 設定模式
         /// 1 : 運作模式
         /// </summary>
         public int RunningMode => _RunningMode.Value;
         private Interlocked_Int32 _RunningMode = new Interlocked_Int32();
-
-        /// <summary>讀出運作/設定模式</summary>
-        /// <param name="mode">
-        /// 0 : 設定模式
-        /// 1 : 運作模式
-        /// </param>
-        /// <remarks>讀出目前動作模式（運作模式/設定模式）。</remarks>
-        public ErrorCode MOR(out int mode)
-        {
-            mode = 0;
-            var r = Execute("MOR").Result;
-            if (r.IsSuccess)
-            {
-                if (r.Result.Get(1).ToInt32(out mode))
-                    _RunningMode.Value = mode;
-            }
-            return r.ErrorCode;
-        }
 
         /// <summary>輸出禁止</summary>
         /// <param name="n">
