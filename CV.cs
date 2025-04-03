@@ -426,8 +426,8 @@ namespace Keyence
             d = nnn = default;
             if (r.IsSuccess)
             {
-                if (r.Result.Get(1).ToInt32(out var d) &&
-                    r.Result.Get(2).ToInt32(out var nnnn))
+                if (r.Result.Get(1).ToInt32(out d) &&
+                    r.Result.Get(2).ToInt32(out nnn))
                     return r.ErrorCode;
                 return SetErr("PR", ErrorCode.Unknown);
             }
@@ -558,7 +558,8 @@ namespace Keyence
         /// <param name="l">
         /// 多次拍攝時的照明 （1～2）
         ///     1：照明A
-        ///     2：照明B</param>
+        ///     2：照明B
+        /// </param>
         public ErrorCode BS(int c, int nnn, int? p = null, int? l = null)
         {
             if (p.HasValue && l.HasValue)
@@ -1083,16 +1084,16 @@ namespace Keyence
 
         /// <summary>讀出版本信息</summary>
         /// <remarks>返回控制器裏的系統資訊 （型號、ROM 版本）。</remarks>
-        /// <param name="nnnn">機種型號 （型號的字串）</param>
-        /// <param name="vvvv">ROM 版本 （14 字元的字串，格式為主要版本前頭第 1 位起的 4 位數.主要版本的前頭第 2 位起的 4 位數.次要版本的4 位數）</param>
-        public ErrorCode VI(out string nnnn, out string vvvv)
+        /// <param name="model">機種型號 （型號的字串）</param>
+        /// <param name="version">ROM 版本 （14 字元的字串，格式為主要版本前頭第 1 位起的 4 位數.主要版本的前頭第 2 位起的 4 位數.次要版本的4 位數）</param>
+        public ErrorCode VI(out string model, out string version)
         {
             var r = Execute("VI").Result;
-            nnnn = vvvv = default;
+            model = version = default;
             if (r.IsSuccess)
             {
-                if (r.Result.TryGetValueAt(1, out nnnn) &&
-                    r.Result.TryGetValueAt(2, out vvvv))
+                if (r.Result.TryGetValueAt(1, out model) &&
+                    r.Result.TryGetValueAt(2, out version))
                     return r.ErrorCode;
                 return SetErr("VI", ErrorCode.Unknown);
             }
@@ -1104,6 +1105,9 @@ namespace Keyence
         /// <param name="n">時間區域 （0～33）</param>
         public ErrorCode TZW(int n) => Execute("TZW", $"{n}").Result.ErrorCode;
 
+        /// <summary>讀出時間區域</summary>
+        /// <remarks>讀取SNTP的時間區域設定。</remarks>
+        /// <param name="n">時間區域 （0～33）</param>
         public ErrorCode TZR(out int n)
         {
             var r = Execute("TZR").Result;
