@@ -898,8 +898,8 @@ namespace Keyence
         ///     • 輸出到VisionDatabase
         /// </remarks>
         /// <param name="enabled">
-        /// – false：禁止觸發輸入
-        /// – true ：許可觸發輸入
+        /// – false：禁止輸出
+        /// – true ：許可輸出
         /// </param>
         public ErrorCode OE(bool enabled) => Execute("OE", $"{(enabled ? 0 : 1)}").Result.ErrorCode;
 
@@ -938,40 +938,40 @@ namespace Keyence
         ///     • 指定的歷史無關是否已保存，一定會儲存。
         ///     • 無應儲存的歷史圖像時，返回 03 錯誤。
         /// </remarks>
-        /// <param name="n">壓縮格式 （0：無壓縮 （BMP）、1：1/2、2：1/4、3：1/8、9：JPEG、10：PNG）</param>
-        /// <param name="m">
+        /// <param name="in_n">壓縮格式 （0：無壓縮 （BMP）、1：1/2、2：1/4、3：1/8、9：JPEG、10：PNG）</param>
+        /// <param name="in_m">
         /// 歷史圖像的種類（歷史存儲條件綜合判定為 NG 時，即使指定 0 也會載入 1 的緩存）
         ///     0 （最新歷史）
         ///     1 （綜合 NG 歷史圖像）
         /// </param>
-        /// <param name="h">
+        /// <param name="in_h">
         /// 檢測次數
         ///     AL （全檢測次數）
         ///     NW （最新）
         ///     整數 （檢測次數）
         /// </param>
-        /// <param name="c">
+        /// <param name="in_c">
         /// CCD 編號
         ///     AL：全 CCD
         ///     1～4：CCD 編號
         /// </param>
-        /// <param name="rd">
+        /// <param name="d">
         /// 設備
         ///     0：SD卡
         ///     1：USB HDD
         /// </param>
-        public ErrorCode HS(int n, int m, string h, string c, out int rn, out int rm, out string rh, out string rc, out int rd)
+        public ErrorCode HS(int in_n, int in_m, string in_h, string in_c, out int n, out int m, out string h, out string c, out int d)
         {
-            var r = Execute("HS", $"{n},{m},{h},{c}").Result;
-            rn = rm = rd = default;
-            rh = rc = default;
+            var r = Execute("HS", $"{in_n},{in_m},{in_h},{in_c}").Result;
+            n = m = d = default;
+            h = c = default;
             if (r.IsSuccess)
             {
-                if (r.Result.Get(1).ToInt32(out rn) &&
-                    r.Result.Get(2).ToInt32(out rm) &&
-                    r.Result.TryGetValueAt(3, out rh) &&
-                    r.Result.TryGetValueAt(4, out rc) &&
-                    r.Result.Get(5).ToInt32(out rd))
+                if (r.Result.Get(1).ToInt32(out n) &&
+                    r.Result.Get(2).ToInt32(out m) &&
+                    r.Result.TryGetValueAt(3, out h) &&
+                    r.Result.TryGetValueAt(4, out c) &&
+                    r.Result.Get(5).ToInt32(out d))
                     return r.ErrorCode;
                 return SetErr("HS", ErrorCode.Unknown);
             }
@@ -1049,7 +1049,6 @@ namespace Keyence
             }
             return r.ErrorCode;
         }
-
 
         /// <summary>日期和時間設定寫入</summary>
         /// <remarks>在控制器中設定指定的日期時間。</remarks>
