@@ -12,16 +12,21 @@ namespace Keyence
 {
     public partial class CV
     {
-        public delegate void DataHandler1(CV sender, string text);
-        public delegate void DataHandler2(CV sender, string command, string text);
-
         private ILogger _logger;
 
         private Interlocked<IPAddress> _IPAddress = new Interlocked<IPAddress>();
-        public IPAddress IP { get => _IPAddress.Value; set { if (!object.Equals(value, _IPAddress.Exchange(value))) CloseConnection(); } }
+        public IPAddress IP
+        {
+            get => _IPAddress.Value;
+            set { if (!object.Equals(value, _IPAddress.Exchange(value))) CloseConnection(); }
+        }
 
         private Interlocked_Int32 _Port = new Interlocked_Int32();
-        public int Port { get => _Port.Value; set { if (_Port.Exchange(value) != value) CloseConnection(); } }
+        public int Port
+        {
+            get => _Port.Value;
+            set { if (_Port.Exchange(value) != value) CloseConnection(); }
+        }
 
         public int CommandTimeout { get; set; }
 
@@ -184,13 +189,17 @@ namespace Keyence
 
         public struct Response
         {
+            public string Command { get; set; }
+            public double Elapsed { get; set; }
             public bool IsSuccess => ErrorCode == ErrorCode.Success;
             public ErrorCode ErrorCode { get; set; }
             public string[] Result { get; set; }
         }
 
-        private Response Execute_Complete(string cmd, ErrorCode errorCode, string[] result = null) => new Response
+        private Response Execute_Complete(string cmd, ErrorCode errorCode, string[] result = null, Stopwatch timer = null) => new Response
         {
+            Command = cmd,
+            Elapsed = timer?.ElapsedMilliseconds ?? 0,
             ErrorCode = SetErr(cmd, errorCode),
             Result = result ?? Array.Empty<string>(),
         };
@@ -237,13 +246,14 @@ namespace Keyence
                         var r = result.ER();
                         if (r)
                         {
+                            cmd_timer.Stop();
                             if (r && result.TryGetValueAt(2, out var err1) && err1.ToInt32(out var err2))
-                                return Execute_Complete(cmd, (ErrorCode)err2, result);
+                                return Execute_Complete(cmd, (ErrorCode)err2, result, cmd_timer);
                             else
-                                return Execute_Complete(cmd, ErrorCode.ER, result);
+                                return Execute_Complete(cmd, ErrorCode.ER, result, cmd_timer);
                         }
                         else
-                            return Execute_Complete(cmd, ErrorCode.Success, result);
+                            return Execute_Complete(cmd, ErrorCode.Success, result, cmd_timer);
                     }
                 }
                 return Execute_Complete(cmd, ErrorCode.CommandTimeout);
@@ -261,65 +271,65 @@ namespace Keyence
         // commands
 
         /// <summary>T1 觸發發行</summary>
-        public ErrorCode T1()
-        {
-            var r = Execute("T1").Result;
-            if (r.IsSuccess)
-                return r.ErrorCode;
-            else if (r.Result.ER(out var err1))
-                if (err1.ToInt32(out int err2))
-                    return SetErr("T1", (ErrorCode)err2);
-            return r.ErrorCode;
-        }
+        public ErrorCode T1() => Execute("T1").Result.ErrorCode;
+        //{
+        //    var r = Execute("T1").Result;
+        //    if (r.IsSuccess)
+        //        return r.ErrorCode;
+        //    else if (r.Result.ER(out var err1))
+        //        if (err1.ToInt32(out int err2))
+        //            return SetErr("T1", (ErrorCode)err2);
+        //    return r.ErrorCode;
+        //}
 
         /// <summary>T2 觸發發行</summary>
-        public ErrorCode T2()
-        {
-            var r = Execute("T2").Result;
-            if (r.IsSuccess)
-                return r.ErrorCode;
-            else if (r.Result.ER(out var err1))
-                if (err1.ToInt32(out int err2))
-                    return SetErr("T2", (ErrorCode)err2);
-            return r.ErrorCode;
-        }
+        public ErrorCode T2() => Execute("T2").Result.ErrorCode;
+        //{
+        //    var r = Execute("T2").Result;
+        //    if (r.IsSuccess)
+        //        return r.ErrorCode;
+        //    else if (r.Result.ER(out var err1))
+        //        if (err1.ToInt32(out int err2))
+        //            return SetErr("T2", (ErrorCode)err2);
+        //    return r.ErrorCode;
+        //}
 
         /// <summary>T3 觸發發行</summary>
-        public ErrorCode T3()
-        {
-            var r = Execute("T3").Result;
-            if (r.IsSuccess)
-                return r.ErrorCode;
-            else if (r.Result.ER(out var err1))
-                if (err1.ToInt32(out int err2))
-                    return SetErr("T3", (ErrorCode)err2);
-            return r.ErrorCode;
-        }
+        public ErrorCode T3() => Execute("T3").Result.ErrorCode;
+        //{
+        //    var r = Execute("T3").Result;
+        //    if (r.IsSuccess)
+        //        return r.ErrorCode;
+        //    else if (r.Result.ER(out var err1))
+        //        if (err1.ToInt32(out int err2))
+        //            return SetErr("T3", (ErrorCode)err2);
+        //    return r.ErrorCode;
+        //}
 
         /// <summary>T4 觸發發行</summary>
-        public ErrorCode T4()
-        {
-            var r = Execute("T4").Result;
-            if (r.IsSuccess)
-                return r.ErrorCode;
-            else if (r.Result.ER(out var err1))
-                if (err1.ToInt32(out int err2))
-                    return SetErr("T4", (ErrorCode)err2);
-            return r.ErrorCode;
-        }
+        public ErrorCode T4() => Execute("T4").Result.ErrorCode;
+        //{
+        //    var r = Execute("T4").Result;
+        //    if (r.IsSuccess)
+        //        return r.ErrorCode;
+        //    else if (r.Result.ER(out var err1))
+        //        if (err1.ToInt32(out int err2))
+        //            return SetErr("T4", (ErrorCode)err2);
+        //    return r.ErrorCode;
+        //}
 
         /// <summary>全觸發發行</summary>
         /// <remarks>T1～T4均發行 （即使有使用不到的觸發，也不視為錯誤）。</remarks>
-        public ErrorCode TA()
-        {
-            var r = Execute("TA").Result;
-            if (r.IsSuccess)
-                return r.ErrorCode;
-            else if (r.Result.ER(out var err1))
-                if (err1.ToInt32(out int err2))
-                    return SetErr("TA", (ErrorCode)err2);
-            return r.ErrorCode;
-        }
+        public ErrorCode TA() => Execute("TA").Result.ErrorCode;
+        //{
+        //    var r = Execute("TA").Result;
+        //    if (r.IsSuccess)
+        //        return r.ErrorCode;
+        //    else if (r.Result.ER(out var err1))
+        //        if (err1.ToInt32(out int err2))
+        //            return SetErr("TA", (ErrorCode)err2);
+        //    return r.ErrorCode;
+        //}
 
         /// <summary>遷移至運轉模式</summary>
         /// <remarks>從設定模式遷移至運轉模式。已經處於運轉模式時，將無任何動作，正常結束。</remarks>
