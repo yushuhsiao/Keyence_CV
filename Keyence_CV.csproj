@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Tools" Version="2025.5.3" />
+	  <ProjectReference Include="..\Tools\Tools.csproj" />
 	</ItemGroup>
 
 </Project>
