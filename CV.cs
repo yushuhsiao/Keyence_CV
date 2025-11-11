@@ -391,6 +391,20 @@ namespace Keyence
         /// <param name="nnn">檢測設定 （0～999）</param>
         public async Task<ErrorCode> PW(int d, int nnn) => (await Execute("PW", $"{d},{nnn}")).ErrorCode;
 
+        /// <summary>
+        /// 目前檢測設定的記憶卡編號 （1～2）
+        ///     – 1：SD1
+        ///     – 2：SD2
+        /// </summary>
+        public int SDCardNumber => _SDCardNumber.Value;
+        private Interlocked_Int32 _SDCardNumber = new Interlocked_Int32();
+
+        /// <summary>
+        /// 目前檢測設定 （0～999）
+        /// </summary>
+        public int SceneDataNumber => _SceneDataNumber.Value;
+        private Interlocked_Int32 _SceneDataNumber = new Interlocked_Int32();
+
         /// <summary>檢測設定讀出</summary>
         /// <remarks>返回當前載入設定的記憶卡編號、檢測設定。</remarks>
         /// <param name="d">
@@ -406,7 +420,7 @@ namespace Keyence
             {
                 if (r.Result.Get(1).ToInt32(out int d) &&
                     r.Result.Get(2).ToInt32(out int nnn))
-                    return (r.ErrorCode, d, nnn);
+                    return (r.ErrorCode, _SDCardNumber.Value = d, _SceneDataNumber.Value = nnn);
                 return (SetErr("PR", ErrorCode.Unknown), default, default);
             }
             return (r.ErrorCode, default, default);
